@@ -1,6 +1,6 @@
-from split_word import cleanWord
 import os
 import math
+import nltk
 
 
 def fre_count(fileName):
@@ -11,25 +11,40 @@ def fre_count(fileName):
 
     """
 
-    stopWords = []
-    with open("stop_words.txt", "r") as fileObj:
-        for stopWord in fileObj:
-            stopWords.append(stopWord[:-1])
-
     result = {}
 
+    stop = nltk.corpus.stopwords.words("english")
+
+    # build re object for splitting words
+    patt = "[A-Za-z]\w+"
+    reObj = nltk.RegexpTokenizer(patt)
+
+    # build porter object
+    lancasterObj = nltk.stem.LancasterStemmer()
+
     with open(fileName, "r") as fileObj:
+
+        # traverse every paragraph
         for paragraph in fileObj:
-            temp = paragraph.split(" ")
+
+            # temp: a word list, include upper and lower, and no duplication eliminating
+            temp = reObj.tokenize(paragraph)
+
+            # translate all words to lower case
             for word in temp:
-                word = cleanWord(word)
-                if word and word not in stopWords:
-                    word = word.lower()
+                word = word.lower()
+
+                # remove the stop words
+                if word not in stop:
+
+                    # stem the words
+                    word = lancasterObj.stem(word)
+
+                    # insert word into dictionary
                     if word not in result:
                         result[word] = 1
                     else:
                         result[word] += 1
-
     return result
 
 
